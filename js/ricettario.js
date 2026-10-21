@@ -11,6 +11,7 @@ if (!pronta) {
 return;
 }
 
+var sottotitolo = document.getElementById("sottotitolo-ricettario");
 var griglia = document.getElementById("griglia-ricettario");
 var vuoto = document.getElementById("ricettario-vuoto");
 var form = document.getElementById("form-modifica-ricetta");
@@ -27,10 +28,13 @@ var cache = leggi("ricette", {});
 var lista = leggi("ricettari", {})[utente] || [];
 
 if (lista.length === 0) {
-vuoto.classList.remove("d-none");
+  vuoto.classList.remove("d-none");
+ sottotitolo.classList.add("d-none");
 } else {
-vuoto.classList.add("d-none");
+  vuoto.classList.add("d-none");
+  sottotitolo.classList.remove("d-none");
 }
+
 
 lista.forEach(function (voce) {
 var originale = cache[voce.id];
