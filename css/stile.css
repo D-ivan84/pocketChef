@@ -1,0 +1,125 @@
+/* Colori in variabili: ogni colore è scritto una volta sola */
+:root {
+  --sfondo: #FBF6EA;
+  --carta: #FFFDF7;
+  --testo: #3B2A20;
+  --tenue: #7A6A5C;
+  --terracotta: #C65D3B;
+  --bordo: #D9CDB4;
+  --salvia: #5E7D52;
+
+}
+
+/* Tema scuro: stesse variabili, valori diversi */
+[data-bs-theme="dark"] {
+  --sfondo: #1F1813;
+  --carta: #2A221B;
+  --testo: #F0E6D2;
+  --tenue: #B5A793;
+  --terracotta: #E07A57;
+  --bordo: #4A3D31;
+  --salvia: #8FAE80;
+}
+
+body {
+  background-color: var(--sfondo);
+  color: var(--testo);
+}
+
+a {
+  color: var(--terracotta);
+}
+
+.text-muted {
+  color: var(--tenue);
+}
+
+.logo {
+  width: 36px;
+  height: 36px;
+}
+
+.footer-pagina {
+  border-top: 1px solid var(--bordo);
+  color: var(--tenue);
+}
+
+
+
+
+
+
+/* Card ricetta "etichetta" */
+.etichetta {
+  background-color: var(--carta);
+  border: 2px dashed var(--bordo);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.etichetta img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.etichetta .corpo {
+  padding: 12px;
+}
+
+.etichetta .titolo {
+  font-size: 1.1rem;
+  margin: 0;
+  color: var(--testo);
+}
+
+.btn-primary {
+  background-color: var(--terracotta);
+  border-color: var(--terracotta);
+  color: var(--carta);
+}
+
+.btn.btn-primary:hover,
+.btn.btn-primary:active,
+.btn.btn-primary:disabled {
+  background-color: var(--testo);
+  border-color: var(--testo);
+  color: var(--carta);
+}
+
+.btn-secondary {
+  background-color: var(--salvia);
+  border-color: var(--salvia);
+  color: var(--carta);
+}
+
+.btn.btn-secondary:hover,
+.btn.btn-secondary:active,
+.btn.btn-secondary:disabled {
+  background-color: var(--testo);
+  border-color: var(--testo);
+  color: var(--carta);
+}
+
+
+
+.progress-bar {
+  background-color: var(--terracotta);
+}
+
+.navbar-nav .nav-link.active {
+  color: var(--terracotta);
+}
+
+/*rendo i button di dimensioni fisse per evitare che si allarghi a cambio pagina tra utente registrato e non*/
+.navbar .btn {
+  min-width: 5rem;
+}
+
+html {
+  overflow-y: scroll;
+}
+
+.procedimento {
+  white-space: pre-line;
+}
