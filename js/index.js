@@ -43,7 +43,7 @@ var griglia = document.getElementById("griglia-ricette");
 for (var i = 0; i < NUMERO_RICETTE && i < tutte.length; i++) {
 griglia.appendChild(creaCardRicetta(tutte[i]));
 }
-document.getElementById("titolo-altre").classList.remove("d-none");
+document.getElementById("sezione-altre").classList.remove("d-none");
 }
 
 mostraHome();

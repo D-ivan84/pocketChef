@@ -32,19 +32,20 @@ async function scaricaLettera(lettera) {
   if (!risposta.ok) {
     throw new Error("Errore HTTP " + risposta.status);  }
   var dati = await risposta.json();
-  // Nessun risultato: l'API risponde 200 con {"meals": null}
   if (dati.meals === null) {
     return [];
   }
   return dati.meals.map(normalizzaRicetta);
 }
 var LETTERE = "abcdefghijklmnopqrstuvwxyz";
-// Restituisce true se i dati sono completi, false se qualcosa è mancato.
-// aggiornaAvanzamento (facoltativa) è una funzione che riceve (fatte, totali).
+// Restituisce true se i dati sono completi, false se manca qualcosa
 async function avviaDati(aggiornaAvanzamento) {
-  if (leggi("cacheInfo", null) !== null) {
-    return true;  }
-
+  var info = leggi("cacheInfo", null);
+  var ricetteInCache = leggi("ricette", null);
+  // Se entrambi esistono e ricette non è vuoto, i dati sono già pronti
+  if (info !== null && ricetteInCache !== null && Object.keys(ricetteInCache).length > 0) {
+    return true;
+  }
   var ricette = {};
   var errori = 0;
   var totali = LETTERE.length + 1;   // 26 lettere + 1 richiesta delle categorie
@@ -84,7 +85,6 @@ async function avviaDati(aggiornaAvanzamento) {
     return true; }
   return false;
 }
-// Scarica l'elenco delle categorie (Beef, Dessert, ...) e lo restituisce
 async function scaricaCategorie() {
   var risposta = await fetch(URL_BASE + "categories.php");
   if (!risposta.ok) {

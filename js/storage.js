@@ -10,12 +10,11 @@ function leggi(chiave, predefinito) {
   }
 }
 
-// Trasforma in JSON e salva.
 function salva(chiave, valore) {
   localStorage.setItem(chiave, JSON.stringify(valore));
 }
 
-// Elimina una chiave.
 function rimuovi(chiave) {
   localStorage.removeItem(chiave);
 }
+

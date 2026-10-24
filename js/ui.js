@@ -102,8 +102,11 @@ function aggiornaAvanzamento(fatte, totali) {
 async function preparaPagina(paginaAttiva) {
   aggiornaNavbar(paginaAttiva);
 
-  // Cache già completa: niente caricamento
-  if (leggi("cacheInfo", null) !== null) {
+  var info = leggi("cacheInfo", null);
+  var ricette = leggi("ricette", null);
+
+  // Cache completa e integra: niente caricamento
+  if (info !== null && ricette !== null && Object.keys(ricette).length > 0) {
     return true;
   }
 
