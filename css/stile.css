@@ -1,4 +1,3 @@
-/* Colori in variabili: ogni colore è scritto una volta sola */
 :root {
   --sfondo: #FBF6EA;
   --carta: #FFFDF7;
@@ -10,7 +9,6 @@
 
 }
 
-/* Tema scuro: stesse variabili, valori diversi */
 [data-bs-theme="dark"] {
   --sfondo: #1F1813;
   --carta: #2A221B;
@@ -22,7 +20,7 @@
 }
 
 html {
-  scrollbar-gutter:stable;
+  scrollbar-gutter: stable;  /*riserva lo spazio per la barra verticale*/
 }
 
 body {
@@ -76,6 +74,7 @@ a {
   white-space: pre-line;
 }
 
+/*classi bootstrap modificate*/
 .btn-primary {
   background-color: var(--terracotta);
   border-color: var(--terracotta);
@@ -112,7 +111,14 @@ a {
   color: var(--terracotta);
 }
 
-/*rendo i button di dimensioni fisse per evitare che si allarghi a cambio pagina tra utente registrato e non*/
 .navbar .btn {
   min-width: 5rem;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--terracotta);
+}
+
+.nav-tabs .nav-link {
+  color: var(--testo);
 }
