@@ -115,3 +115,10 @@ a {
   min-width: 5rem;
 }
 
+.nav-tabs .nav-link.active {
+  color: var(--terracotta);
+}
+
+.nav-tabs .nav-link {
+  color: var(--testo);
+}
