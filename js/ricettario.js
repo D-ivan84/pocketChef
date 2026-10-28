@@ -1,5 +1,4 @@
 async function mostraRicettario() {
-  // se non c'è un utente collegato, vado al login
   var utente = leggi("utenteCollegato", null);
   if (utente === null) {
     window.location.replace("accesso.html");
@@ -24,10 +23,11 @@ async function mostraRicettario() {
 
   function disegna() {
     griglia.textContent = "";
-    var cache = leggi("ricette", {});
-    var lista = leggi("ricettari", {})[utente] || [];
+    var ricette = leggi("ricette", {});
+    var ricettari = leggi("ricettari", {});
+    var ricettarioUtente = ricettari[utente] || [];
 
-    if (lista.length === 0) {
+    if (ricettarioUtente.length === 0) {
       vuoto.classList.remove("d-none");
       sottotitolo.classList.add("d-none");
     } else {
@@ -35,19 +35,19 @@ async function mostraRicettario() {
       sottotitolo.classList.remove("d-none");
     }
 
-    lista.forEach(function (voce) {
-      var originale = cache[voce.id];
+    ricettarioUtente.forEach(function (ricettaUtente) {
+      var ricettaOriginale = ricette[ricettaUtente.id];
 
-      // Controllo di guardia: se la ricetta non è in cache, la salta per evitare crash
-      if (!originale) {
+      // Controllo se la ricetta non è in "ricette"
+      if (!ricettaOriginale) {
         return;
       }
 
       var colonna = creaCardRicetta({
-        id: voce.id,
-        nome: voce.nomePersonale,
-        categoria: originale.categoria,
-        immagine: originale.immagine
+        id: ricettaUtente.id,
+        nome: ricettaUtente.nomePersonale,
+        categoria: ricettaOriginale.categoria,
+        immagine: ricettaOriginale.immagine
       });
 
       var blocco = creaElemento("div", "d-flex gap-2 mt-2");
@@ -56,17 +56,26 @@ async function mostraRicettario() {
       var bRimuovi = creaElemento("button", "btn btn-primary btn-sm", "Remove");
       bRimuovi.type = "button";
 
+      blocco.appendChild(bModifica);
+      blocco.appendChild(bRimuovi);
+      colonna.appendChild(blocco);
+      var testoNota = (leggi("note", {})[utente] || {})[ricettaUtente.id];
+      if (testoNota) {
+        var p = creaElemento("p", "text-break small text-muted mt-2 mb-0", "NOTE: " + testoNota);
+        colonna.appendChild(p);
+      }
+      griglia.appendChild(colonna);
+
       bModifica.addEventListener("click", function () {
-        idInModifica = voce.id;
-        campoNome.value = voce.nomePersonale;
-        // copie salvate prima della modifica degli ingredienti: parto dagli originali
-        if (voce.ingredientiPersonali === undefined) {
-          campoIngredienti.value = ingredientiComeTesto(originale);
-        } else {
-          campoIngredienti.value = voce.ingredientiPersonali;
-        }
-        campoIstruzioni.value = voce.istruzioniPersonali;
-        campoNota.value = (leggi("note", {})[utente] || {})[voce.id] || "";
+        idInModifica = ricettaUtente.id;
+        campoNome.value = ricettaUtente.nomePersonale;
+        campoIngredienti.value = ricettaUtente.ingredientiPersonali;
+        campoIstruzioni.value = ricettaUtente.istruzioniPersonali;
+
+        var tutteNote = leggi("note", {});
+        var noteUtente = tutteNote[utente] || {};
+        campoNota.value = noteUtente[ricettaUtente.id] || "";
+
         errore.classList.add("d-none");
         form.classList.remove("d-none");
         window.scrollTo(0, 0);
@@ -74,34 +83,22 @@ async function mostraRicettario() {
 
       bRimuovi.addEventListener("click", function () {
         if (!confirm("Remove recipe from cookbook? Your custom changes will be lost.")) {
-          return;
-        }
+          return;  }
         var ricettari = leggi("ricettari", {});
-        ricettari[utente] = (ricettari[utente] || []).filter(function (x) {
-          return String(x.id) !== String(voce.id);
+        ricettari[utente] = (ricettari[utente] || []).filter(function (ric) {
+          return String(ric.id) !== String(ricettaUtente.id);
         });
         salva("ricettari", ricettari);
         var note = leggi("note", {});
         if (note[utente]) {
-          delete note[utente][voce.id];
-          salva("note", note);
-        }
-        if (String(idInModifica) === String(voce.id)) {
+          delete note[utente][ricettaUtente.id];
+          salva("note", note);  }
+        if (String(idInModifica) === String(ricettaUtente.id)) {
           idInModifica = null;
-          form.classList.add("d-none");
-        }
+          form.classList.add("d-none");   }
         disegna();
       });
 
-      blocco.appendChild(bModifica);
-      blocco.appendChild(bRimuovi);
-      colonna.appendChild(blocco);
-
-      var testoNota = (leggi("note", {})[utente] || {})[voce.id];
-      if (testoNota) {
-        colonna.appendChild(creaElemento("p", "procedimento text-break small text-muted mt-2 mb-0", "NOTE: " + testoNota));
-      }
-      griglia.appendChild(colonna);
     });
   }
 
@@ -119,19 +116,19 @@ async function mostraRicettario() {
     }
 
     var ricettari = leggi("ricettari", {});
-    var lista = ricettari[utente] || [];
-    for (var i = 0; i < lista.length; i++) {
-      if (String(lista[i].id) === String(idInModifica)) {
-        lista[i].nomePersonale = nome;
-        lista[i].ingredientiPersonali = ingredienti;
-        lista[i].istruzioniPersonali = istruzioni;
+    var ricettarioUtente = ricettari[utente] || [];
+    for (var i = 0; i < ricettarioUtente.length; i++) {
+      if (String(ricettarioUtente[i].id) === String(idInModifica)) {
+        ricettarioUtente[i].nomePersonale = nome;
+        ricettarioUtente[i].ingredientiPersonali = ingredienti;
+        ricettarioUtente[i].istruzioniPersonali = istruzioni;
       }
     }
     salva("ricettari", ricettari);
 
     var testoNota = campoNota.value.trim();
     var note = leggi("note", {});
-    if (note[utente] === undefined) {
+    if (!note[utente]) {
       note[utente] = {};
     }
     if (testoNota === "") {
@@ -150,7 +147,6 @@ async function mostraRicettario() {
     idInModifica = null;
     form.classList.add("d-none");
   });
-
   disegna();
 }
 

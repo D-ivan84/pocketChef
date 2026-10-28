@@ -1,258 +1,250 @@
 async function mostraRicetta() {
-var pronta = await preparaPagina("ricetta");
-if (!pronta) {
-return;
-}
+    var pronta = await preparaPagina("ricetta");
+    if (!pronta) {
+        return;
+    }
 
-var titolo = document.getElementById("ricetta-titolo");
-var errore = document.getElementById("ricetta-errore");
-var scheda = document.getElementById("scheda");
+    var titolo = document.getElementById("ricetta-titolo");
+    var errore = document.getElementById("ricetta-errore");
+    var scheda = document.getElementById("scheda");
 
-// 1) Leggo ?id= dall'indirizzo (null se manca)
-var parametri = new URLSearchParams(window.location.search);
-var id = parametri.get("id");
+    var parametri = new URLSearchParams(window.location.search);
+    var id = parametri.get("id");
 
-// 2) Cerco la ricetta nella cache
-var tutte = Object.values(leggi("ricette", {}));
-var ricetta = null;
-for (var i = 0; i < tutte.length; i++) {
-if (String(tutte[i].id) === id) {
-ricetta = tutte[i];
-}
-}
+    var ricette = Object.values(leggi("ricette", {}));
+    var ricetta = null;
+    for (var i = 0; i < ricette.length; i++) {
+        if (String(ricette[i].id) === id) {
+            ricetta = ricette[i];
+            break;
+        }
+    }
 
-if (ricetta === null) {
-errore.textContent = "Recipe not found.";
-errore.classList.remove("d-none");
-return;
-}
+    if (ricetta === null) {
+        errore.textContent = "Recipe not found.";
+        errore.classList.remove("d-none");
+        return;
+    }
 
-// 3) Riempio la scheda (sempre l'originale)
-titolo.textContent = ricetta.nome;
-document.title = ricetta.nome + " · Chef in Tasca";
+    titolo.textContent = ricetta.nome;
+    document.title = ricetta.nome + " · Chef in Tasca";
 
-var immagine = document.getElementById("ricetta-immagine");
-immagine.src = ricetta.immagine;
-immagine.alt = ricetta.nome;
+    var immagine = document.getElementById("ricetta-immagine");
+    immagine.src = ricetta.immagine;
+    immagine.alt = ricetta.nome;
 
-document.getElementById("ricetta-categoria").textContent = ricetta.categoria;
-document.getElementById("ricetta-area").textContent = ricetta.area;
-document.getElementById("ricetta-istruzioni").textContent = ricetta.istruzioni;
+    document.getElementById("ricetta-categoria").textContent = ricetta.categoria;
+    document.getElementById("ricetta-area").textContent = ricetta.area;
+    document.getElementById("ricetta-istruzioni").textContent = ricetta.istruzioni;
 
-var elenco = document.getElementById("ricetta-ingredienti");
-for (var j = 0; j < ricetta.ingredienti.length; j++) {
-var ing = ricetta.ingredienti[j];
-var riga = (ing.misura + " " + ing.nome).trim();
-elenco.appendChild(creaElemento("li", "", riga));
-}
+    var elenco = document.getElementById("ricetta-ingredienti");
+    for (var j = 0; j < ricetta.ingredienti.length; j++) {
+        var ing = ricetta.ingredienti[j];
+        var riga = (ing.misura + " " + ing.nome).trim();
+        elenco.appendChild(creaElemento("li", "", riga));
+    }
 
-if (ricetta.youtube) {
-var video = document.getElementById("ricetta-youtube");
-video.href = ricetta.youtube;
-video.classList.remove("d-none");
-}
+    if (ricetta.youtube) {
+        var video = document.getElementById("ricetta-youtube");
+        video.href = ricetta.youtube;
+        video.classList.remove("d-none");
+    }
 
-// 3b) Riquadro "La mia versione" (copia personale + nota), solo se c'è qualcosa di mio
-var utente = leggi("utenteCollegato", null);
-var riquadro = document.getElementById("mia-versione");
+    function pulito(testo) {
+        return testo.replaceAll("\r", "").trim();
+    }
+    var utente = leggi("utenteCollegato", null);
+    var riquadro = document.getElementById("mia-versione");
+    function aggiornaMiaVersione() {
+        if (utente === null) {
+            return;
+        }
 
-// toglie i "\r" (a capo di TheMealDB) e gli spazi ai bordi, per confrontare i testi
-function pulito(testo) {
-return testo.split("\r").join("").trim();
-}
+        var rigaNota = document.getElementById("mia-nota");
+        riquadro.classList.add("d-none");
+        rigaNota.classList.add("d-none");
 
-function aggiornaMiaVersione() {
-riquadro.classList.add("d-none");
-if (utente === null) {
-return;
-}
-var lista = leggi("ricettari", {})[utente] || [];
-var copia = lista.filter(function (x) { return String(x.id) === id; })[0];
-if (!copia) {
-return;
-}
+        var testoNota = (leggi("note", {})[utente] || {})[id];
+        if (testoNota) {
+            rigaNota.textContent = "Nota personale: " + testoNota;
+            rigaNota.classList.remove("d-none");
+        }
 
-// copie salvate prima della modifica degli ingredienti: uso gli originali
-var ingMiei = copia.ingredientiPersonali;
-if (ingMiei === undefined) {
-ingMiei = ingredientiComeTesto(ricetta);
-}
+        //Riquadro "Mia Versione"
+        var ricettarioUtente = leggi("ricettari", {})[utente] || [];
+        var copia = ricettarioUtente.find(function (ric) { return String(ric.id) === id;});
 
-var testoNota = (leggi("note", {})[utente] || {})[id];
+        if (!copia) {
+            return;
+        }
 
-var modificata = pulito(copia.nomePersonale) !== pulito(ricetta.nome)
-|| pulito(ingMiei) !== pulito(ingredientiComeTesto(ricetta))
-|| pulito(copia.istruzioniPersonali) !== pulito(ricetta.istruzioni);
+        var ingUtente = copia.ingredientiPersonali;
 
-// se non ho cambiato nulla e non ho una nota, non mostro niente
-if (!modificata && !testoNota) {
-return;
-}
+        var modificata = pulito(copia.nomePersonale) !== pulito(ricetta.nome)
+            || pulito(ingUtente) !== pulito(ingredientiComeTesto(ricetta))
+            || pulito(copia.istruzioniPersonali) !== pulito(ricetta.istruzioni);
 
-document.getElementById("mia-nome").textContent = copia.nomePersonale;
-document.getElementById("mia-ingredienti").textContent = ingMiei;
-document.getElementById("mia-istruzioni").textContent = copia.istruzioniPersonali;
+        // Se non ci sono modifiche ai testi della ricetta, non mostro il riquadro
+        if (!modificata) {
+            return;
+        }
 
-var rigaNota = document.getElementById("mia-nota");
-if (testoNota) {
-rigaNota.textContent = "NOTE: " + testoNota;
-rigaNota.classList.remove("d-none");
-} else {
-rigaNota.classList.add("d-none");
-}
+        document.getElementById("mia-nome").textContent = copia.nomePersonale;
+        document.getElementById("mia-ingredienti").textContent = ingUtente;
+        document.getElementById("mia-istruzioni").textContent = copia.istruzioniPersonali;
 
-riquadro.classList.remove("d-none");
-}
+        riquadro.classList.remove("d-none");
+    }
 
-// 3c) Pulsante ricettario
-if (utente === null) {
-document.getElementById("ricetta-invito").classList.remove("d-none");
-} else {
-var bottone = document.getElementById("ricetta-bottone-ricettario");
-var mio = leggi("ricettari", {})[utente] || [];
-var presente = mio.some(function (x) { return String(x.id) === id; });
+    if (utente === null) {
+        document.getElementById("ricetta-invito").classList.remove("d-none");
+    } else {
+        var bottone = document.getElementById("ricetta-bottone-ricettario");
+        var ricUtente = leggi("ricettari", {})[utente] || [];
+        var presente = ricUtente.some(function (x) { return String(x.id) === id; });
 
-if (presente) {
-bottone.textContent = "Remove from cookbook";
-}
-bottone.classList.remove("d-none");
+        if (presente) {
+            bottone.textContent = "Remove from cookbook";
+        }
+        bottone.classList.remove("d-none");
 
-bottone.addEventListener("click", function () {
-var ricettari = leggi("ricettari", {});
-var lista = ricettari[utente] || [];
+        bottone.addEventListener("click", function () {
+            var ricettari = leggi("ricettari", {});
+            var ricettarioUtente = ricettari[utente] || [];
 
-if (presente) {
-if (!confirm("Remove recipe from cookbook? Your custom changes will be lost.")) {
-return;
-}
-lista = lista.filter(function (x) { return String(x.id) !== id; });
+            if (presente) {
+                if (!confirm("Remove recipe from cookbook? Your custom changes will be lost.")) {
+                    return;
+                }
+                ricettarioUtente = ricettarioUtente.filter(function (ric) { return String(ric.id) !== id; });
 
-// cancello anche la nota privata di questa ricetta
-var note = leggi("note", {});
-if (note[utente]) {
-delete note[utente][id];
-salva("note", note);
-}
+                var note = leggi("note", {});
+                if (note[utente]) {
+                    delete note[utente][id];
+                    salva("note", note);
+                }
 
-bottone.textContent = "Add to cookbook";
-} else {
-lista.push({
-id: ricetta.id,
-aggiuntaIl: new Date().toISOString().slice(0, 10),
-nomePersonale: ricetta.nome,
-ingredientiPersonali: ingredientiComeTesto(ricetta),
-istruzioniPersonali: ricetta.istruzioni
-});
-bottone.textContent = "Remove from cookbook";
-}
+                bottone.textContent = "Add to cookbook";
+            } else {
+                ricettarioUtente.push({
+                    id: ricetta.id,
+                    aggiuntaIl: new Date().toISOString().slice(0, 10),
+                    nomePersonale: ricetta.nome,
+                    ingredientiPersonali: ingredientiComeTesto(ricetta),
+                    istruzioniPersonali: ricetta.istruzioni
+                });
+                bottone.textContent = "Remove from cookbook";
+            }
 
-presente = !presente;
-ricettari[utente] = lista;
-salva("ricettari", ricettari);
-aggiornaMiaVersione();
-});
-}
+            presente = !presente;
+            ricettari[utente] = ricettarioUtente;
+            salva("ricettari", ricettari);
+            aggiornaMiaVersione();
+        });
+    }
+    aggiornaMiaVersione();
 
-aggiornaMiaVersione();
+    // Recensioni
+    var contenitore = document.getElementById("ricetta-recensioni");
+    var nessuna = document.getElementById("ricetta-nessuna-recensione");
+    var formRec = document.getElementById("form-recensione");
+    var erroreRec = document.getElementById("errore-recensione");
 
-// 4) Recensioni
-var contenitore = document.getElementById("ricetta-recensioni");
-var nessuna = document.getElementById("ricetta-nessuna-recensione");
-var formRec = document.getElementById("form-recensione");
-var erroreRec = document.getElementById("errore-recensione");
+    function disegnaRecensioni() {
+        contenitore.textContent = "";
+        var recensioni = leggi("recensioni", []);
+        var numRecensioni = 0;
+        var recensionePresente = false;
 
-function disegnaRecensioni() {
-contenitore.textContent = "";
-var recensioni = leggi("recensioni", []);
-var quante = 0;
-var haGia = false;
+        recensioni.forEach(function (rec) {
+            if (String(rec.idRicetta) !== id) {
+                return;
+            }
+            numRecensioni++;
+            var blocco = creaElemento("div", "border rounded p-2 mb-2");
+            blocco.appendChild(creaElemento("strong", "", rec.username));
+            blocco.appendChild(creaElemento("span", "text-muted", " · prepared on " +
+                rec.dataPreparazione.split("-").reverse().join("/")));
+            blocco.appendChild(creaElemento("div", "", "Difficulty: " + rec.difficolta + "/5 · Taste: " + rec.gusto + "/5"));
+            if (rec.commento) {
+                blocco.appendChild(creaElemento("div", "", rec.commento));
+            }
 
-recensioni.forEach(function (rec) {
-if (String(rec.idRicetta) !== id) {
-return;
-}
-quante++;
-var blocco = creaElemento("div", "border rounded p-2 mb-2");
-blocco.appendChild(creaElemento("strong", "", rec.username));
-blocco.appendChild(creaElemento("span", "text-muted", " · prepared on " +
-rec.dataPreparazione.split("-").reverse().join("/")));
-blocco.appendChild(creaElemento("div", "", "Difficulty: " + rec.difficolta + "/5 · Taste: " + rec.gusto + "/5"));
-if (rec.commento) {
-blocco.appendChild(creaElemento("div", "", rec.commento));
-}
+            if (utente !== null && rec.username === utente) {
+                recensionePresente = true;
+                var bRimuoviRec = creaElemento("button", "btn btn-primary btn-sm mt-2", "Remove my review");
+                bRimuoviRec.type = "button";
+                blocco.appendChild(bRimuoviRec);
 
-if (utente !== null && rec.username === utente) {
-haGia = true;
-var bRimuoviRec = creaElemento("button", "btn btn-primary btn-sm mt-2", "Remove my review");
-bRimuoviRec.type = "button";
-bRimuoviRec.addEventListener("click", function () {
-if (!confirm("Remove your review?")) {
-return;
-}
-var tutteRec = leggi("recensioni", []);
-tutteRec = tutteRec.filter(function (x) { return x.id !== rec.id; });
-salva("recensioni", tutteRec);
-disegnaRecensioni();
-});
-blocco.appendChild(bRimuoviRec);
-}
+                bRimuoviRec.addEventListener("click", function () {
+                    if (!confirm("Remove your review?")) {
+                        return;
+                    }
+                    var tutteRec = leggi("recensioni", []);
+                    tutteRec = tutteRec.filter(function (x) { return x.id !== rec.id; });
+                    salva("recensioni", tutteRec);
+                    disegnaRecensioni();
+                });
+                
+            }
 
-contenitore.appendChild(blocco);
-});
+            contenitore.appendChild(blocco);
+        });
 
-if (quante === 0) {
-nessuna.classList.remove("d-none");
-} else {
-nessuna.classList.add("d-none");
-}
+        if (numRecensioni === 0) {
+            nessuna.classList.remove("d-none");
+        } else {
+            nessuna.classList.add("d-none");
+        }
 
-if (utente !== null && !haGia) {
-formRec.classList.remove("d-none");
-} else {
-formRec.classList.add("d-none");
-}
-}
+        if (utente !== null && !recensionePresente) {
+            formRec.classList.remove("d-none");
+        } else {
+            formRec.classList.add("d-none");
+        }
+    }
 
-formRec.addEventListener("submit", function (evento) {
-evento.preventDefault();
-var data = document.getElementById("rec-data").value;
-var difficolta = document.getElementById("rec-difficolta").value;
-var gusto = document.getElementById("rec-gusto").value;
-var commento = document.getElementById("rec-commento").value.trim();
-var oggi = new Date().toISOString().slice(0, 10);
-erroreRec.classList.add("d-none");
+    formRec.addEventListener("submit", function (evento) {
+        evento.preventDefault();
+        var data = document.getElementById("rec-data").value;
+        var difficolta = document.getElementById("rec-difficolta").value;
+        var gusto = document.getElementById("rec-gusto").value;
+        var commento = document.getElementById("rec-commento").value.trim();
+        var oggi = new Date().toISOString().slice(0, 10);
+        erroreRec.classList.add("d-none");
 
-if (data === "" || difficolta === "" || gusto === "") {
-erroreRec.textContent = "Please choose the date and both ratings.";
-erroreRec.classList.remove("d-none");
-return;
-}
-if (data > oggi) {
-erroreRec.textContent = "Preparation date cannot be in the future.";
-erroreRec.classList.remove("d-none");
-return;
-}
+        if (data === "" || difficolta === "" || gusto === "") {
+            erroreRec.textContent = "Please choose the date and both ratings.";
+            erroreRec.classList.remove("d-none");
+            return;
+        }
+        
+        if (data > oggi) {
+            erroreRec.textContent = "Preparation date cannot be in the future.";
+            erroreRec.classList.remove("d-none");
+            return;
+        }
 
-var recensioni = leggi("recensioni", []);
-recensioni.push({
-id: Date.now(),
-idRicetta: ricetta.id,
-username: utente,
-dataPreparazione: data,
-difficolta: Number(difficolta),
-gusto: Number(gusto),
-commento: commento,
-creataIl: new Date().toISOString()
-});
-salva("recensioni", recensioni);
+        var recensioni = leggi("recensioni", []);
+        recensioni.push({
+            id: Date.now(),
+            idRicetta: ricetta.id,
+            username: utente,
+            dataPreparazione: data,
+            difficolta: Number(difficolta),
+            gusto: Number(gusto),
+            commento: commento,
+            creataIl: new Date().toISOString()
+        });
+        salva("recensioni", recensioni);
 
-formRec.reset();
-disegnaRecensioni();
-});
+        formRec.reset();
+        disegnaRecensioni();
+    });
 
-disegnaRecensioni();
+    disegnaRecensioni();
 
-scheda.classList.remove("d-none");
+    scheda.classList.remove("d-none");
 }
 
 mostraRicetta();
