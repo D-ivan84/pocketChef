@@ -66,7 +66,7 @@ async function mostraRicetta() {
 
         var testoNota = (leggi("note", {})[utente] || {})[id];
         if (testoNota) {
-            rigaNota.textContent = "Private note: " + testoNota;
+            rigaNota.textContent = "NOTE: " + testoNota;
             rigaNota.classList.remove("d-none");
         }
 
@@ -218,7 +218,7 @@ async function mostraRicetta() {
             erroreRec.classList.remove("d-none");
             return;
         }
-        
+
         if (data > oggi) {
             erroreRec.textContent = "Preparation date cannot be in the future.";
             erroreRec.classList.remove("d-none");

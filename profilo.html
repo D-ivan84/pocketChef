@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="css/stile.css">
   <link rel="icon" href="img/logo.svg" type="image/svg+xml">
 </head>
+
 <body class="d-flex flex-column min-vh-100">
 
   <header id="intestazione" class="sticky-top">
@@ -73,6 +74,10 @@
           <input type="password" class="form-control" id="profilo-password" placeholder="At least 4 characters">
         </div>
         <div class="mb-3">
+          <label for="profilo-confPassword" class="form-label">Confirm password</label>
+          <input type="password" class="form-control" id="profilo-confPassword" placeholder="Re-enter your password">
+        </div>
+        <div class="mb-3">
           <label for="profilo-piatto" class="form-label">Favorite dish</label>
           <input type="text" class="form-control" id="profilo-piatto">
         </div>
@@ -93,4 +98,5 @@
   <script src="js/ui.js"></script>
   <script src="js/profilo.js"></script>
 </body>
+
 </html>

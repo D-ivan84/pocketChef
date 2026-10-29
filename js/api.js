@@ -26,11 +26,11 @@ function normalizzaRicetta(m) { //elimino gli ingredienti vuoti
     youtube: m.strYoutube,
     ingredienti: ingredienti };
 }
-// Scarica le ricette di una lettera e restituisce un array (vuoto se non ce ne sono).
+
 async function scaricaLettera(lettera) {
   var risposta = await fetch(URL_BASE + "search.php?f=" + lettera);
   if (!risposta.ok) {
-    throw new Error("Errore HTTP " + risposta.status);  }
+    throw new Error("HTTP Error " + risposta.status);  }
   var dati = await risposta.json();
   if (dati.meals === null) {
     return [];
@@ -41,7 +41,7 @@ async function scaricaLettera(lettera) {
 async function scaricaCategorie() {
   var risposta = await fetch(URL_BASE + "categories.php");
   if (!risposta.ok) {
-    throw new Error("Errore HTTP " + risposta.status);  }
+    throw new Error("HTTP Error " + risposta.status);  }
   var dati = await risposta.json();
 
   var categorie = []; //creo un nuovo array categorie 
@@ -77,7 +77,7 @@ async function avviaDati(aggiornaAvanzamento) {
       }
     } catch (e) {
       errori++;
-      console.log("Lettera fallita:", LETTERE[i], e);    }
+      console.log("Failed letter:", LETTERE[i], e);    }
     fatte++;
     if (typeof aggiornaAvanzamento === "function") {
       aggiornaAvanzamento(fatte, totali);
@@ -88,7 +88,7 @@ async function avviaDati(aggiornaAvanzamento) {
     salva("categorie", categorie);
   } catch (e) {
     errori++;
-    console.log("Categorie fallite:", e);  }
+    console.log("Failed category:", e);  }
   fatte++;
   if (typeof aggiornaAvanzamento === "function") {
     aggiornaAvanzamento(fatte, totali);  }
