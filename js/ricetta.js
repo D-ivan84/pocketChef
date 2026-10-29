@@ -66,7 +66,7 @@ async function mostraRicetta() {
 
         var testoNota = (leggi("note", {})[utente] || {})[id];
         if (testoNota) {
-            rigaNota.textContent = "Nota personale: " + testoNota;
+            rigaNota.textContent = "Private note: " + testoNota;
             rigaNota.classList.remove("d-none");
         }
 
