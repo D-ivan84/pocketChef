@@ -1,6 +1,6 @@
 function leggi(chiave, predefinito) {
   try {
-    var testo = localStorage.getItem(chiave);
+    const testo = localStorage.getItem(chiave);
     if (testo === null) {
       return predefinito;
     }
@@ -17,4 +17,3 @@ function salva(chiave, valore) {
 function rimuovi(chiave) {
   localStorage.removeItem(chiave);
 }
-

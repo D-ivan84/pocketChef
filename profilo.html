@@ -8,10 +8,10 @@
 
   <script>
     try {
-      var t = JSON.parse(localStorage.getItem("tema"));
+      const t = JSON.parse(localStorage.getItem("tema"));
       if (t === "dark" || t === "light") {
-        document.documentElement.setAttribute("data-bs-theme", t)
-      };
+        document.documentElement.setAttribute("data-bs-theme", t);
+      }
     } catch (e) { }
   </script>
 

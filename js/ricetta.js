@@ -1,19 +1,19 @@
 async function mostraRicetta() {
-    var pronta = await preparaPagina("ricetta");
+    const pronta = await preparaPagina("ricetta");
     if (!pronta) {
         return;
     }
 
-    var titolo = document.getElementById("ricetta-titolo");
-    var errore = document.getElementById("ricetta-errore");
-    var scheda = document.getElementById("scheda");
+    const titolo = document.getElementById("ricetta-titolo");
+    const errore = document.getElementById("ricetta-errore");
+    const scheda = document.getElementById("scheda");
 
-    var parametri = new URLSearchParams(window.location.search);
-    var id = parametri.get("id");
+    const parametri = new URLSearchParams(window.location.search);
+    const id = parametri.get("id");
 
-    var ricette = Object.values(leggi("ricette", {}));
-    var ricetta = null;
-    for (var i = 0; i < ricette.length; i++) {
+    const ricette = Object.values(leggi("ricette", {}));
+    let ricetta = null;
+    for (let i = 0; i < ricette.length; i++) {
         if (String(ricette[i].id) === id) {
             ricetta = ricette[i];
             break;
@@ -29,7 +29,7 @@ async function mostraRicetta() {
     titolo.textContent = ricetta.nome;
     document.title = ricetta.nome + " · Chef in Tasca";
 
-    var immagine = document.getElementById("ricetta-immagine");
+    const immagine = document.getElementById("ricetta-immagine");
     immagine.src = ricetta.immagine;
     immagine.alt = ricetta.nome;
 
@@ -37,15 +37,15 @@ async function mostraRicetta() {
     document.getElementById("ricetta-area").textContent = ricetta.area;
     document.getElementById("ricetta-istruzioni").textContent = ricetta.istruzioni;
 
-    var elenco = document.getElementById("ricetta-ingredienti");
-    for (var j = 0; j < ricetta.ingredienti.length; j++) {
-        var ing = ricetta.ingredienti[j];
-        var riga = (ing.misura + " " + ing.nome).trim();
+    const elenco = document.getElementById("ricetta-ingredienti");
+    for (let j = 0; j < ricetta.ingredienti.length; j++) {
+        const ing = ricetta.ingredienti[j];
+        const riga = (ing.misura + " " + ing.nome).trim();
         elenco.appendChild(creaElemento("li", "", riga));
     }
 
     if (ricetta.youtube) {
-        var video = document.getElementById("ricetta-youtube");
+        const video = document.getElementById("ricetta-youtube");
         video.href = ricetta.youtube;
         video.classList.remove("d-none");
     }
@@ -53,34 +53,34 @@ async function mostraRicetta() {
     function pulito(testo) {
         return testo.replaceAll("\r", "").trim();
     }
-    var utente = leggi("utenteCollegato", null);
-    var riquadro = document.getElementById("mia-versione");
+    const utente = leggi("utenteCollegato", null);
+    const riquadro = document.getElementById("mia-versione");
     function aggiornaMiaVersione() {
         if (utente === null) {
             return;
         }
 
-        var rigaNota = document.getElementById("mia-nota");
+        const rigaNota = document.getElementById("mia-nota");
         riquadro.classList.add("d-none");
         rigaNota.classList.add("d-none");
 
-        var testoNota = (leggi("note", {})[utente] || {})[id];
+        const testoNota = (leggi("note", {})[utente] || {})[id];
         if (testoNota) {
             rigaNota.textContent = "NOTE: " + testoNota;
             rigaNota.classList.remove("d-none");
         }
 
-        //Riquadro "Mia Versione"
-        var ricettarioUtente = leggi("ricettari", {})[utente] || [];
-        var copia = ricettarioUtente.find(function (ric) { return String(ric.id) === id;});
+        // Riquadro "Mia Versione"
+        const ricettarioUtente = leggi("ricettari", {})[utente] || [];
+        const copia = ricettarioUtente.find(function (ric) { return String(ric.id) === id; });
 
         if (!copia) {
             return;
         }
 
-        var ingUtente = copia.ingredientiPersonali;
+        const ingUtente = copia.ingredientiPersonali;
 
-        var modificata = pulito(copia.nomePersonale) !== pulito(ricetta.nome)
+        const modificata = pulito(copia.nomePersonale) !== pulito(ricetta.nome)
             || pulito(ingUtente) !== pulito(ingredientiComeTesto(ricetta))
             || pulito(copia.istruzioniPersonali) !== pulito(ricetta.istruzioni);
 
@@ -99,9 +99,9 @@ async function mostraRicetta() {
     if (utente === null) {
         document.getElementById("ricetta-invito").classList.remove("d-none");
     } else {
-        var bottone = document.getElementById("ricetta-bottone-ricettario");
-        var ricUtente = leggi("ricettari", {})[utente] || [];
-        var presente = ricUtente.some(function (x) { return String(x.id) === id; });
+        const bottone = document.getElementById("ricetta-bottone-ricettario");
+        const ricUtente = leggi("ricettari", {})[utente] || [];
+        let presente = ricUtente.some(function (x) { return String(x.id) === id; });
 
         if (presente) {
             bottone.textContent = "Remove from cookbook";
@@ -109,8 +109,8 @@ async function mostraRicetta() {
         bottone.classList.remove("d-none");
 
         bottone.addEventListener("click", function () {
-            var ricettari = leggi("ricettari", {});
-            var ricettarioUtente = ricettari[utente] || [];
+            const ricettari = leggi("ricettari", {});
+            let ricettarioUtente = ricettari[utente] || [];
 
             if (presente) {
                 if (!confirm("Remove recipe from cookbook? Your custom changes will be lost.")) {
@@ -118,7 +118,7 @@ async function mostraRicetta() {
                 }
                 ricettarioUtente = ricettarioUtente.filter(function (ric) { return String(ric.id) !== id; });
 
-                var note = leggi("note", {});
+                const note = leggi("note", {});
                 if (note[utente]) {
                     delete note[utente][id];
                     salva("note", note);
@@ -145,23 +145,23 @@ async function mostraRicetta() {
     aggiornaMiaVersione();
 
     // Recensioni
-    var contenitore = document.getElementById("ricetta-recensioni");
-    var nessuna = document.getElementById("ricetta-nessuna-recensione");
-    var formRec = document.getElementById("form-recensione");
-    var erroreRec = document.getElementById("errore-recensione");
+    const contenitore = document.getElementById("ricetta-recensioni");
+    const nessuna = document.getElementById("ricetta-nessuna-recensione");
+    const formRec = document.getElementById("form-recensione");
+    const erroreRec = document.getElementById("errore-recensione");
 
     function disegnaRecensioni() {
         contenitore.textContent = "";
-        var recensioni = leggi("recensioni", []);
-        var numRecensioni = 0;
-        var recensionePresente = false;
+        const recensioni = leggi("recensioni", []);
+        let numRecensioni = 0;
+        let recensionePresente = false;
 
         recensioni.forEach(function (rec) {
             if (String(rec.idRicetta) !== id) {
                 return;
             }
             numRecensioni++;
-            var blocco = creaElemento("div", "border rounded p-2 mb-2");
+            const blocco = creaElemento("div", "border rounded p-2 mb-2");
             blocco.appendChild(creaElemento("strong", "", rec.username));
             blocco.appendChild(creaElemento("span", "text-muted", " · prepared on " +
                 rec.dataPreparazione.split("-").reverse().join("/")));
@@ -172,7 +172,7 @@ async function mostraRicetta() {
 
             if (utente !== null && rec.username === utente) {
                 recensionePresente = true;
-                var bRimuoviRec = creaElemento("button", "btn btn-primary btn-sm mt-2", "Remove my review");
+                const bRimuoviRec = creaElemento("button", "btn btn-primary btn-sm mt-2", "Remove my review");
                 bRimuoviRec.type = "button";
                 blocco.appendChild(bRimuoviRec);
 
@@ -180,12 +180,11 @@ async function mostraRicetta() {
                     if (!confirm("Remove your review?")) {
                         return;
                     }
-                    var tutteRec = leggi("recensioni", []);
+                    let tutteRec = leggi("recensioni", []);
                     tutteRec = tutteRec.filter(function (x) { return x.id !== rec.id; });
                     salva("recensioni", tutteRec);
                     disegnaRecensioni();
                 });
-                
             }
 
             contenitore.appendChild(blocco);
@@ -206,11 +205,11 @@ async function mostraRicetta() {
 
     formRec.addEventListener("submit", function (evento) {
         evento.preventDefault();
-        var data = document.getElementById("rec-data").value;
-        var difficolta = document.getElementById("rec-difficolta").value;
-        var gusto = document.getElementById("rec-gusto").value;
-        var commento = document.getElementById("rec-commento").value.trim();
-        var oggi = new Date().toISOString().slice(0, 10);
+        const data = document.getElementById("rec-data").value;
+        const difficolta = document.getElementById("rec-difficolta").value;
+        const gusto = document.getElementById("rec-gusto").value;
+        const commento = document.getElementById("rec-commento").value.trim();
+        const oggi = new Date().toISOString().slice(0, 10);
         erroreRec.classList.add("d-none");
 
         if (data === "" || difficolta === "" || gusto === "") {
@@ -225,7 +224,7 @@ async function mostraRicetta() {
             return;
         }
 
-        var recensioni = leggi("recensioni", []);
+        const recensioni = leggi("recensioni", []);
         recensioni.push({
             id: Date.now(),
             idRicetta: ricetta.id,

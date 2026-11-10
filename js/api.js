@@ -1,20 +1,23 @@
-var URL_BASE = "https://www.themealdb.com/api/json/v1/1/";
-function normalizzaRicetta(m) { //elimino gli ingredienti vuoti
-  var ingredienti = [];
-  for (var i = 1; i <= 20; i++) {
-    var nome = m["strIngredient" + i];
-    var misura = m["strMeasure" + i];
+const URL_BASE = "https://www.themealdb.com/api/json/v1/1/";
+
+function normalizzaRicetta(m) { // elimino gli ingredienti vuoti
+  const ingredienti = [];
+  for (let i = 1; i <= 20; i++) {
+    const nome = m["strIngredient" + i];
+    const misura = m["strMeasure" + i];
 
     if (nome && nome.trim() !== "") { 
-      var misuraPulita = "";
+      let misuraPulita = "";
       if (misura) {
-        misuraPulita = misura.trim();   }
+        misuraPulita = misura.trim();
+      }
       ingredienti.push({ nome: nome.trim(), misura: misuraPulita });
     }
   }
-  var tags = [];
+  let tags = [];
   if (m.strTags) {
-    tags = m.strTags.split(",");  }
+    tags = m.strTags.split(",");
+  }
   return {
     id: m.idMeal,
     nome: m.strMeal,
@@ -24,14 +27,16 @@ function normalizzaRicetta(m) { //elimino gli ingredienti vuoti
     immagine: m.strMealThumb,
     tags: tags,
     youtube: m.strYoutube,
-    ingredienti: ingredienti };
+    ingredienti: ingredienti
+  };
 }
 
 async function scaricaLettera(lettera) {
-  var risposta = await fetch(URL_BASE + "search.php?f=" + lettera);
+  const risposta = await fetch(URL_BASE + "search.php?f=" + lettera);
   if (!risposta.ok) {
-    throw new Error("HTTP Error " + risposta.status);  }
-  var dati = await risposta.json();
+    throw new Error("HTTP Error " + risposta.status);
+  }
+  const dati = await risposta.json();
   if (dati.meals === null) {
     return [];
   }
@@ -39,14 +44,15 @@ async function scaricaLettera(lettera) {
 }
 
 async function scaricaCategorie() {
-  var risposta = await fetch(URL_BASE + "categories.php");
+  const risposta = await fetch(URL_BASE + "categories.php");
   if (!risposta.ok) {
-    throw new Error("HTTP Error " + risposta.status);  }
-  var dati = await risposta.json();
+    throw new Error("HTTP Error " + risposta.status);
+  }
+  const dati = await risposta.json();
 
-  var categorie = []; //creo un nuovo array categorie 
-  for (var i = 0; i < dati.categories.length; i++) {
-    var c = dati.categories[i];
+  const categorie = []; // creo un nuovo array categorie 
+  for (let i = 0; i < dati.categories.length; i++) {
+    const c = dati.categories[i];
     categorie.push({
       id: c.idCategory,
       nome: c.strCategory,
@@ -54,50 +60,56 @@ async function scaricaCategorie() {
       descrizione: c.strCategoryDescription
     });
   }
-  return categorie;}
+  return categorie;
+}
 
-var LETTERE = "abcdefghijklmnopqrstuvwxyz";
+const LETTERE = "abcdefghijklmnopqrstuvwxyz";
+
 // Restituisce true se i dati sono completi, false se manca qualcosa
 async function avviaDati(aggiornaAvanzamento) {
-  var info = leggi("infoArchivio", null);
-  var ricetteInMemoria = leggi("ricette", null);
+  const info = leggi("infoArchivio", null);
+  const ricetteInMemoria = leggi("ricette", null);
   // Se entrambi esistono e ricette non è vuoto, i dati sono già pronti
   if (info !== null && ricetteInMemoria !== null && Object.keys(ricetteInMemoria).length > 0) {
     return true;
   }
-  var ricette = {};
-  var errori = 0;
-  var totali = LETTERE.length + 1;   // 26 lettere + 1 richiesta delle categorie
-  var fatte = 0;
-  for (var i = 0; i < LETTERE.length; i++) {
+  const ricette = {};
+  let errori = 0;
+  const totali = LETTERE.length + 1; // 26 lettere + 1 richiesta delle categorie
+  let fatte = 0;
+  for (let i = 0; i < LETTERE.length; i++) {
     try {
-      var lista = await scaricaLettera(LETTERE[i]);
-      for (var j = 0; j < lista.length; j++) {
+      const lista = await scaricaLettera(LETTERE[i]);
+      for (let j = 0; j < lista.length; j++) {
         ricette[lista[j].id] = lista[j];
       }
     } catch (e) {
       errori++;
-      console.log("Failed letter:", LETTERE[i], e);    }
+      console.log("Failed letter:", LETTERE[i], e);
+    }
     fatte++;
     if (typeof aggiornaAvanzamento === "function") {
       aggiornaAvanzamento(fatte, totali);
     }
   }
   try {
-    var categorie = await scaricaCategorie();
+    const categorie = await scaricaCategorie();
     salva("categorie", categorie);
   } catch (e) {
     errori++;
-    console.log("Failed category:", e);  }
+    console.log("Failed category:", e);
+  }
   fatte++;
   if (typeof aggiornaAvanzamento === "function") {
-    aggiornaAvanzamento(fatte, totali);  }
+    aggiornaAvanzamento(fatte, totali);
+  }
   salva("ricette", ricette);
   if (errori === 0) {
     salva("infoArchivio", {
       scaricatoData: new Date().toISOString(),
       numRicette: Object.keys(ricette).length
     });
-    return true; }
+    return true;
+  }
   return false;
 }

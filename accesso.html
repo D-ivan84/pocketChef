@@ -9,7 +9,7 @@
 
   <script>
     try {
-      var t = JSON.parse(localStorage.getItem("tema"));
+      const t = JSON.parse(localStorage.getItem("tema"));
       if (t === "dark" || t === "light") {
         document.documentElement.setAttribute("data-bs-theme", t);
       }
@@ -23,6 +23,7 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
+  
   <header id="intestazione" class="sticky-top">
     <nav class="navbar navbar-expand-md bg-body-tertiary">
       <div class="container">
@@ -111,11 +112,13 @@
               </div>
               <div class="mb-3">
                 <label for="reg-password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="reg-password" autocomplete="new-password" placeholder="At least 4 characters">
+                <input type="password" class="form-control" id="reg-password" autocomplete="new-password"
+                  placeholder="At least 4 characters">
               </div>
               <div class="mb-3">
                 <label for="reg-passwordConf" class="form-label">Confirm password</label>
-                <input type="password" class="form-control" id="reg-passwordConf" autocomplete="new-password" placeholder="Re-enter your password">
+                <input type="password" class="form-control" id="reg-passwordConf" autocomplete="new-password"
+                  placeholder="Re-enter your password">
               </div>
               <div class="mb-3">
                 <label for="reg-piatto" class="form-label">Favorite dish</label>
@@ -139,4 +142,5 @@
   <script src="js/ui.js"></script>
   <script src="js/accesso.js"></script>
 </body>
+
 </html>

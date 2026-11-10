@@ -1,20 +1,20 @@
 async function mostraCerca() {
-    var bottone = document.getElementById("cerca-bottone");
-    var pronta = await preparaPagina("cerca");
+    const bottone = document.getElementById("cerca-bottone");
+    const pronta = await preparaPagina("cerca");
     if (!pronta) {
         return;
     }
 
-    var form = document.getElementById("form-cerca");
-    var campoTesto = document.getElementById("cerca-testo");
-    var campoTipo = document.getElementById("cerca-tipo");
-    var campoCategoria = document.getElementById("cerca-categoria");
-    var messaggio = document.getElementById("cerca-messaggio");
-    var risultati = document.getElementById("risultati");
+    const form = document.getElementById("form-cerca");
+    const campoTesto = document.getElementById("cerca-testo");
+    const campoTipo = document.getElementById("cerca-tipo");
+    const campoCategoria = document.getElementById("cerca-categoria");
+    const messaggio = document.getElementById("cerca-messaggio");
+    const risultati = document.getElementById("risultati");
 
-    var categorie = leggi("categorie", []);
-    for (var i = 0; i < categorie.length; i++) {
-        var opzione = document.createElement("option");
+    const categorie = leggi("categorie", []);
+    for (let i = 0; i < categorie.length; i++) {
+        const opzione = document.createElement("option");
         opzione.value = categorie[i].nome;
         opzione.textContent = categorie[i].nome;
         campoCategoria.appendChild(opzione);
@@ -23,9 +23,9 @@ async function mostraCerca() {
     form.addEventListener("submit", function (evento) {
         evento.preventDefault();
 
-        var testo = campoTesto.value.trim().toLowerCase();
-        var tipo = campoTipo.value;
-        var categoria = campoCategoria.value;
+        const testo = campoTesto.value.trim().toLowerCase();
+        const tipo = campoTipo.value;
+        const categoria = campoCategoria.value;
         risultati.textContent = "";
         messaggio.classList.add("d-none");
         if (testo === "" && categoria === "") {
@@ -34,15 +34,15 @@ async function mostraCerca() {
             return;
         }
 
-        var parole = testo.split(" ").filter(function (p) { //creo un array di parole divise da spazio
+        const parole = testo.split(" ").filter(function (p) { // creo un array di parole divise da spazio
             return p !== "";
         });
 
-        var tutteRicette = Object.values(leggi("ricette", {}));
-        var trovate = [];
-        for (var k = 0; k < tutteRicette.length; k++) {
-            var r = tutteRicette[k];
-            var ok = true;
+        const tutteRicette = Object.values(leggi("ricette", {}));
+        const trovate = [];
+        for (let k = 0; k < tutteRicette.length; k++) {
+            const r = tutteRicette[k];
+            let ok = true;
             if (categoria !== "" && r.categoria !== categoria) {
                 ok = false;
             }
@@ -50,13 +50,13 @@ async function mostraCerca() {
                 if (tipo === "lettera") {
                     ok = r.nome.toLowerCase().charAt(0) === testo.charAt(0);
                 } else {
-                    var campoRicerca = "";
+                    let campoRicerca = "";
                     switch (tipo) {
                         case "titolo":
                             campoRicerca = r.nome;
                             break;
                         case "ingrediente":
-                            for (var j = 0; j < r.ingredienti.length; j++) {
+                            for (let j = 0; j < r.ingredienti.length; j++) {
                                 campoRicerca += r.ingredienti[j].nome + " ";
                             }
                             break;
@@ -69,14 +69,13 @@ async function mostraCerca() {
                     }
 
                     campoRicerca = campoRicerca.toLowerCase();
-                    for (var p = 0; p < parole.length; p++) { //devono includere tutte le parole inserite
+                    for (let p = 0; p < parole.length; p++) { // devono includere tutte le parole inserite
                         if (!campoRicerca.includes(parole[p])) {
                             ok = false;
                         }
                     }
                 }
             }
-
 
             if (ok) {
                 trovate.push(r);
@@ -87,7 +86,7 @@ async function mostraCerca() {
             messaggio.textContent = "No recipes found.";
         } else {
             messaggio.textContent = "Recipes found: " + trovate.length;
-            for (var m = 0; m < trovate.length; m++) {
+            for (let m = 0; m < trovate.length; m++) {
                 risultati.appendChild(creaCardRicetta(trovate[m]));
             }
         }

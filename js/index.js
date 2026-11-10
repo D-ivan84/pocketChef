@@ -1,27 +1,27 @@
-var NUMERO_RICETTE = 12;
+const NUMERO_RICETTE = 12;
 
 async function mostraHome() {
-    var pronta = await preparaPagina("home");
+    const pronta = await preparaPagina("home");
     if (!pronta) {
         return;
     }
 
-    var utente = leggi("utenteCollegato", null);
+    const utente = leggi("utenteCollegato", null);
     if (utente !== null) {
-        var sottotitolo = document.getElementById("sottotitolo");
+        const sottotitolo = document.getElementById("sottotitolo");
         if (sottotitolo) {
             sottotitolo.textContent = "Welcome back, " + utente + "! Here is a selection of recipes from around the world.";
         }
     }
 
-    var tutte = Object.values(leggi("ricette", {}));
+    const tutte = Object.values(leggi("ricette", {}));
 
-    var oggi = new Date().toISOString().slice(0, 10); //creo la data formato aaaa-mm-gg ed elimino l'orario
-    var giorno = leggi("ricettaDelGiorno", null);
-    var scelta = null;
+    const oggi = new Date().toISOString().slice(0, 10); // creo la data formato aaaa-mm-gg ed elimino l'orario
+    const giorno = leggi("ricettaDelGiorno", null);
+    let scelta = null;
 
     if (giorno !== null && giorno.data === oggi) {
-        for (var k = 0; k < tutte.length; k++) {
+        for (let k = 0; k < tutte.length; k++) {
             if (String(tutte[k].id) === String(giorno.id)) {
                 scelta = tutte[k];
             }
@@ -38,8 +38,8 @@ async function mostraHome() {
         document.getElementById("ricetta-del-giorno").classList.remove("d-none");
     }
 
-    var griglia = document.getElementById("griglia-ricette");
-    for (var i = 0; i < NUMERO_RICETTE && i < tutte.length; i++) {
+    const griglia = document.getElementById("griglia-ricette");
+    for (let i = 0; i < NUMERO_RICETTE && i < tutte.length; i++) {
         griglia.appendChild(creaCardRicetta(tutte[i]));
     }
     document.getElementById("sezione-altre").classList.remove("d-none");
